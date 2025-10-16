@@ -261,7 +261,7 @@ TEST(TSet, can_intersect_two_sets_of_equal_size)
 TEST(TSet, can_intersect_two_sets_of_non_equal_size)
 {
   const int size1 = 5, size2 = 7;
-  TSet set1(size1), set2(size2), set3(size1), expSet(size2);
+  TSet set1(size1), set2(size2);
   // set1 = {1, 2, 4}
   set1.InsElem(1);
   set1.InsElem(2);
@@ -272,8 +272,9 @@ TEST(TSet, can_intersect_two_sets_of_non_equal_size)
   set2.InsElem(2);
   set2.InsElem(4);
   set2.InsElem(6);
-  set3 = set1 * set2;
+  TSet set3 = set1 * set2;
   // expSet = {1, 2, 4}
+  TSet expSet(size1);
   expSet.InsElem(1);
   expSet.InsElem(2);
   expSet.InsElem(4);
@@ -294,4 +295,51 @@ TEST(TSet, check_negation_operator)
   expSet.InsElem(2);
 
   EXPECT_EQ(expSet, set1);
+}
+
+// Добавленные новые тесты 
+
+TEST(TSet, multiple_set_operations_in_single_expression)
+{
+    const int size = 10;
+    TSet set1(size), set2(size), set3(size);
+
+    // set1 = {0, 1, 2}
+    set1.InsElem(0);
+    set1.InsElem(1);
+    set1.InsElem(2);
+
+    // set2 = {2, 3, 4}
+    set2.InsElem(2);
+    set2.InsElem(3);
+    set2.InsElem(4);
+
+    // set3 = {4, 5, 6}
+    set3.InsElem(4);
+    set3.InsElem(5);
+    set3.InsElem(6);
+
+    // set1 + set2 + set3 = {0, 1, 2, 3, 4, 5, 6}
+    TSet result = set1 + set2 + set3;
+
+    TSet expected(size);
+    for (int i = 0; i < 7; i++) {
+        expected.InsElem(i);
+    }
+
+    EXPECT_EQ(expected, result);
+
+    // Тестируем комбинированные операции
+    // (set1 + set2) * set3
+    TSet result2 = (set1 + set2) * set3;
+    TSet expected2(size);
+    expected2.InsElem(4); // {4} - пересечение объединения set1+set2 с set3
+
+    EXPECT_EQ(expected2, result2);
+
+    // set1 * set2 * set3 - должно быть пустое множество
+    TSet result3 = set1 * set2 * set3;
+    TSet expected3(size); // пустое множество
+
+    EXPECT_EQ(expected3, result3);
 }

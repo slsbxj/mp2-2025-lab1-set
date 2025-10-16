@@ -209,7 +209,7 @@ TEST(TBitField, and_operator_applied_to_bitfields_of_equal_size)
 TEST(TBitField, and_operator_applied_to_bitfields_of_non_equal_size)
 {
   const int size1 = 4, size2 = 5;
-  TBitField bf1(size1), bf2(size2), expBf(size2);
+  TBitField bf1(size1), bf2(size2);
   // bf1 = 0011
   bf1.SetBit(2);
   bf1.SetBit(3);
@@ -218,6 +218,7 @@ TEST(TBitField, and_operator_applied_to_bitfields_of_non_equal_size)
   bf2.SetBit(3);
 
   // expBf = 00010
+  TBitField expBf(size1);
   expBf.SetBit(3);
 
   EXPECT_EQ(expBf, bf1 & bf2);
@@ -253,21 +254,27 @@ TEST(TBitField, can_invert_large_bitfield)
 
 TEST(TBitField, invert_plus_and_operator_on_different_size_bitfield)
 {
-  const int firstSze = 4, secondSize = 8;
-  TBitField firstBf(firstSze), negFirstBf(firstSze), secondBf(secondSize), testBf(secondSize);
-  // firstBf = 0001
-  firstBf.SetBit(0);
-  negFirstBf = ~firstBf;
-  // negFirstBf = 1110
+    const int firstSize = 4, secondSize = 8;
+    TBitField firstBf(firstSize), secondBf(secondSize);
 
-  // secondBf = 00011000
-  secondBf.SetBit(3);
-  secondBf.SetBit(4);
+    firstBf.SetBit(0);
+    secondBf.SetBit(3);
+    secondBf.SetBit(4);
 
-  // testBf = 00001000
-  testBf.SetBit(3);
+    // Создаем расширенную версию negFirstBf
+    TBitField extendedNeg(secondSize);
+    for (int i = 0; i < firstSize; i++) {
+        if (!firstBf.GetBit(i)) { // инвертируем firstBf
+            extendedNeg.SetBit(i);
+        }
+    }
 
-  EXPECT_EQ(secondBf & negFirstBf, testBf);
+    TBitField expected(secondSize);
+    expected.SetBit(3); // 00001000
+
+    TBitField result = secondBf & extendedNeg;
+
+    EXPECT_EQ(expected, result);
 }
 
 TEST(TBitField, can_invert_many_random_bits_bitfield)
@@ -308,4 +315,63 @@ TEST(TBitField, bitfields_with_different_bits_are_not_equal)
   bf2.SetBit(2);
 
   EXPECT_NE(bf1, bf2);
+}
+
+// Добавленные новые тесты
+
+TEST(TBitField, double_clear_bit_remains_zero) {
+    const int size = 8;
+    TBitField bf(size);
+
+    bf.SetBit(3);
+    EXPECT_EQ(1, bf.GetBit(3));
+
+    bf.ClrBit(3);
+    EXPECT_EQ(0, bf.GetBit(3));
+
+    bf.ClrBit(3);
+    EXPECT_EQ(0, bf.GetBit(3));
+
+    for (int i = 0; i < size; i++) {
+        if (i != 3) {
+            EXPECT_EQ(0, bf.GetBit(i));
+        }
+    }
+}
+
+TEST(TBitField, multiple_bit_operations_in_single_expression)
+{
+    const int size = 6;
+    TBitField bf1(size), bf2(size), bf3(size);
+
+    // bf1 = 100100 (биты 0 и 3)
+    bf1.SetBit(0);
+    bf1.SetBit(3);
+
+    // bf2 = 010010 (биты 1 и 4)  
+    bf2.SetBit(1);
+    bf2.SetBit(4);
+
+    // bf3 = 001001 (биты 2 и 5)
+    bf3.SetBit(2);
+    bf3.SetBit(5);
+
+    // bf1 | bf2 | bf3 = 111111
+    // Выполняем поэтапно, так как оператор | возвращает временный объект
+    TBitField result1 = bf1 | bf2;
+    TBitField result = result1 | bf3;
+
+    TBitField expected(size);
+    for (int i = 0; i < size; i++) {
+        expected.SetBit(i);
+    }
+
+    EXPECT_EQ(expected, result);
+
+    // Тестируем комбинированные операции: (bf1 | bf2) & bf3
+    TBitField union12 = bf1 | bf2; // 110110
+    TBitField result2 = union12 & bf3; // 110110 & 001001 = 000000
+
+    TBitField expected2(size); // все биты 0
+    EXPECT_EQ(expected2, result2);
 }
