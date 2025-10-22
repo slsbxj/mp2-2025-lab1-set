@@ -3,7 +3,7 @@
 
 TSet::TSet(int mp) : MaxPower(mp), BitField(mp) {
     if (mp <= 0) {
-        throw std::invalid_argument("Мощность множества должна быть положительной");
+        throw std::invalid_argument("The cardinality of the set must be positive");
     }
 }
 
@@ -21,21 +21,21 @@ int TSet::GetMaxPower(void) const {
 
 void TSet::InsElem(const int Elem) {
     if (Elem < 0 || Elem >= MaxPower) {
-        throw std::out_of_range("Элемент за пределами универсума");
+        throw std::out_of_range("An element beyond the universe");
     }
     BitField.SetBit(Elem);
 }
 
 void TSet::DelElem(const int Elem) {
     if (Elem < 0 || Elem >= MaxPower) {
-        throw std::out_of_range("Элемент за пределами универсума");
+        throw std::out_of_range("An element beyond the universe");
     }
     BitField.ClrBit(Elem);
 }
 
 int TSet::IsMember(const int Elem) const {
     if (Elem < 0 || Elem >= MaxPower) {
-        throw std::out_of_range("Элемент за пределами универсума");
+        throw std::out_of_range("An element beyond the universe");
     }
     return BitField.GetBit(Elem);
 }
@@ -48,6 +48,7 @@ int TSet::operator!=(const TSet& s) const {
     return !(*this == s);
 }
 
+// Перегрузка оператора присваивания 
 TSet& TSet::operator=(const TSet& s) {
     if (this != &s) {
         MaxPower = s.MaxPower;
@@ -58,7 +59,7 @@ TSet& TSet::operator=(const TSet& s) {
 
 TSet TSet::operator+(const int Elem) {
     if (Elem < 0 || Elem >= MaxPower) {
-        throw std::out_of_range("Элемент за пределами универсума");
+        throw std::out_of_range("An element beyond the universe");
     }
     TSet result(*this);
     result.InsElem(Elem);
@@ -67,7 +68,7 @@ TSet TSet::operator+(const int Elem) {
 
 TSet TSet::operator-(const int Elem) {
     if (Elem < 0 || Elem >= MaxPower) {
-        throw std::out_of_range("Элемент за пределами универсума");
+        throw std::out_of_range("An element beyond the universe");
     }
     TSet result(*this);
     result.DelElem(Elem);

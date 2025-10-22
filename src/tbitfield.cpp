@@ -3,7 +3,7 @@
 
 TBitField::TBitField(int len) : BitLen(len) {
     if (len <= 0) {
-        throw std::invalid_argument("Длина битового поля должна быть положительной");
+        throw std::invalid_argument("The bit field length must be positive");
     }
     MemLen = (BitLen + sizeof(TELEM) * 8 - 1) / (sizeof(TELEM) * 8);
     pMem = new TELEM[MemLen];
@@ -21,18 +21,19 @@ TBitField::TBitField(const TBitField& bf) : BitLen(bf.BitLen), MemLen(bf.MemLen)
 
 TBitField::~TBitField() {
     delete[] pMem;
+    pMem = nullptr;
 }
 
 int TBitField::GetMemIndex(const int n) const {
     if (n < 0 || n >= BitLen) {
-        throw std::out_of_range("Бит за пределами битового поля");
+        throw std::out_of_range("A bit outside the bit field");
     }
     return n / (sizeof(TELEM) * 8);
 }
 
 TELEM TBitField::GetMemMask(const int n) const {
     if (n < 0 || n >= BitLen) {
-        throw std::out_of_range("Бит за пределами битового поля");
+        throw std::out_of_range("A bit outside the bit field");
     }
     return 1 << (n % (sizeof(TELEM) * 8));
 }
@@ -59,17 +60,16 @@ int TBitField::GetBit(const int n) const {
     return (pMem[index] & mask) != 0;
 }
 
+// Проверка на сравнение
 int TBitField::operator==(const TBitField& bf) const {
     if (BitLen != bf.BitLen) {
         return 0;
     }
-
     for (int i = 0; i < MemLen; i++) {
         if (pMem[i] != bf.pMem[i]) {
             return 0;
         }
     }
-
     return 1;
 }
 
@@ -82,6 +82,7 @@ TBitField& TBitField::operator=(const TBitField& bf) {
         BitLen = bf.BitLen;
         if (MemLen != bf.MemLen) {
             delete[] pMem;
+            pMem = nullptr;
             MemLen = bf.MemLen;
             pMem = new TELEM[MemLen];
         }
